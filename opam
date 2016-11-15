@@ -1,0 +1,34 @@
+opam-version: "1.2"
+authors: "John Else"
+homepage: "https://github.com/johnelse/ocaml-promise-js"
+bug-reports: "https://github.com/johnelse/ocaml-promise-js/issues"
+dev-repo: "git://github.com/johnelse/ocaml-promise-js"
+maintainer: "john.else@gmail.com"
+available: [ ocaml-version >= "4.02.1" ]
+build: [
+  [
+    "./configure"
+    "--prefix" prefix
+  ]
+  [make "build"]
+]
+build-test: [
+  [
+    "./configure"
+    "--enable-tests"
+  ]
+  [make "test"]
+]
+install: [
+  [make "PREFIX=%{prefix}%" "install"]
+]
+remove: [
+  ["ocamlfind" "remove" "promise-js"]
+]
+depends: [
+  "oasis" {build}
+  "ocamlbuild" {build}
+  "ocamlfind" {build}
+  "js_of_ocaml"
+  "webtest" {test}
+]

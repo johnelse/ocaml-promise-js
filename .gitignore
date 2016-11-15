@@ -1,0 +1,11 @@
+_build
+
+setup.data
+setup.log
+
+geckodriver.log
+
+*.byte
+*.swp
+
+test/test_runner.js

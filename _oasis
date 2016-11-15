@@ -1,0 +1,29 @@
+OASISFormat: 0.4
+OCamlVersion: >= 4.02
+Name:        promise-js
+Version:     0.1.0
+Authors:     John Else
+License:     MIT
+Synopsis:    OCaml bindings for the Javascript Promise API
+Plugins:     META (0.4), DevFiles (0.4)
+BuildTools:  ocamlbuild
+
+PostCleanCommand:     rm -f test/test_runner.js
+
+Library "promise-js"
+  Path:               lib
+  Modules:            Promise
+  BuildDepends:       js_of_ocaml, js_of_ocaml.ppx
+
+Executable test_runner
+  Build$:             flag(tests)
+  CompiledObject:     byte
+  Path:               test
+  MainIs:             test_runner.ml
+  BuildDepends:       promise-js, webtest.js
+  Install:            false
+
+Test test
+  PreCommand:         js_of_ocaml test_runner.byte -o test/test_runner.js
+  Command:            xvfb-run test/test_driver.py
+  Run$:               flag(tests)
