@@ -9,3 +9,7 @@ end
 val promise : (('a resolve -> 'b reject -> unit) -> ('a, 'b) promise Js.t) Js.constr
 
 val is_supported : unit -> bool
+
+val all :
+  (('a, 'b) promise Js.t) Js.js_array Js.t ->
+  ('a Js.js_array Js.t, 'b) promise Js.t
