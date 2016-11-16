@@ -13,3 +13,7 @@ val is_supported : unit -> bool
 val all :
   (('a, 'b) promise Js.t) Js.js_array Js.t ->
   ('a Js.js_array Js.t, 'b) promise Js.t
+
+val race :
+  (('a, 'b) promise Js.t) Js.js_array Js.t ->
+  ('a, 'b) promise Js.t

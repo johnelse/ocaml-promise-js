@@ -14,3 +14,6 @@ let is_supported () = Js.Optdef.test promise
 
 let all promises =
   Js.Unsafe.fun_call promise_global##.all [|Js.Unsafe.inject promises|]
+
+let race promises =
+  Js.Unsafe.fun_call promise_global##.race [|Js.Unsafe.inject promises|]
