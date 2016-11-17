@@ -131,10 +131,25 @@ let race =
       "test_race_reject_two" >:~ test_race_reject_two;
     ]
 
+let test_resolve wrapper =
+  let expected_result = 42 in
+  let promise = Promise.resolve expected_result in
+
+  promise##then_
+    (fun result -> wrapper (fun () -> assert_equal result expected_result))
+    (fun error  -> wrapper (fun () -> failwith "error detected"))
+
+let resolve =
+  "resolve" >:::
+    [
+      "test_resolve" >:~ test_resolve;
+    ]
+
 let suite =
   "base_suite" >::: [
     environment;
     then_;
     all;
     race;
+    resolve;
   ]

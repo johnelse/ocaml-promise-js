@@ -17,3 +17,6 @@ let all promises =
 
 let race promises =
   Js.Unsafe.fun_call promise_global##.race [|Js.Unsafe.inject promises|]
+
+let resolve value =
+  Js.Unsafe.fun_call promise_global##.resolve [|Js.Unsafe.inject value|]

@@ -17,3 +17,5 @@ val all :
 val race :
   (('a, 'b) promise Js.t) Js.js_array Js.t ->
   ('a, 'b) promise Js.t
+
+val resolve : 'a -> ('a, 'b) promise Js.t
