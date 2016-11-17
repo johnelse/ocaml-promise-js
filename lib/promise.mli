@@ -19,3 +19,5 @@ val race :
   ('a, 'b) promise Js.t
 
 val resolve : 'a -> ('a, 'b) promise Js.t
+
+val reject : 'a -> ('b, 'a) promise Js.t

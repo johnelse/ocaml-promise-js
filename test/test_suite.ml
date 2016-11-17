@@ -145,6 +145,20 @@ let resolve =
       "test_resolve" >:~ test_resolve;
     ]
 
+let test_reject wrapper =
+  let expected_error = new%js Js.error_constr (Js.string "error") in
+  let promise = Promise.reject expected_error in
+
+  promise##then_
+    (fun result -> wrapper (fun () -> failwith "result returned"))
+    (fun error  -> wrapper (fun () -> assert_equal error expected_error))
+
+let reject =
+  "reject" >:::
+    [
+      "test_reject" >:~ test_reject;
+    ]
+
 let suite =
   "base_suite" >::: [
     environment;
@@ -152,4 +166,5 @@ let suite =
     all;
     race;
     resolve;
+    reject;
   ]
