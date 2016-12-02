@@ -1,10 +1,10 @@
-type 'a resolve = 'a -> unit
-
-type 'a reject = 'a -> unit
-
 class type ['a, 'b] promise = object
   method then_ : ('a -> unit) -> ('b -> unit) -> unit Js.meth
 end
+
+type 'a resolve = 'a -> unit
+
+type 'a reject = 'a -> unit
 
 let promise_global = Js.Unsafe.global##._Promise
 
