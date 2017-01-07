@@ -20,4 +20,4 @@ val race :
 
 val resolve : 'a -> ('a, 'b) promise Js.t
 
-val reject : 'a -> ('b, 'a) promise Js.t
+val reject : 'b -> ('a, 'b) promise Js.t
