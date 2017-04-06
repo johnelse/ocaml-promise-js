@@ -19,7 +19,7 @@ let test_then_resolve wrapper =
   let promise =
     new%js Promise.promise (fun resolve _ -> resolve expected_result) in
 
-  promise##then_
+  promise##then_final
     (fun result -> wrapper (fun () -> assert_equal result expected_result))
     (fun error  -> wrapper (fun () -> failwith "error detected"))
 
@@ -29,12 +29,12 @@ let test_then_reject wrapper =
   let promise =
     new%js Promise.promise (fun _ reject -> reject expected_error) in
 
-  promise##then_
+  promise##then_final
     (fun result -> wrapper (fun () -> failwith "result returned"))
     (fun error  -> wrapper (fun () -> assert_equal error expected_error))
 
-let then_ =
-  "then" >::: [
+let then_final =
+  "then_final" >::: [
     "test_then_resolve" >:~ test_then_resolve;
     "test_then_reject" >:~ test_then_reject;
   ]
@@ -52,7 +52,7 @@ let test_all_resolve wrapper =
   let promise3 =
     new%js Promise.promise (fun resolve _ -> resolve result3) in
 
-  (Promise.all (Js.array [|promise1; promise2; promise3|]))##then_
+  (Promise.all (Js.array [|promise1; promise2; promise3|]))##then_final
     (fun result -> wrapper (fun () -> assert_equal result expected_result))
     (fun error  -> wrapper (fun () -> failwith "error detected"))
 
@@ -68,7 +68,7 @@ let test_all_reject wrapper =
   let promise3 =
     new%js Promise.promise (fun _ reject -> reject expected_error) in
 
-  (Promise.all (Js.array [|promise1; promise2; promise3|]))##then_
+  (Promise.all (Js.array [|promise1; promise2; promise3|]))##then_final
     (fun result -> wrapper (fun () -> failwith "result returned"))
     (fun error  -> wrapper (fun () -> assert_equal error expected_error))
 
@@ -84,7 +84,7 @@ let test_race_resolve_one wrapper =
   let promise =
     new%js Promise.promise (fun resolve _ -> resolve expected_result) in
 
-  (Promise.race (Js.array [|promise|]))##then_
+  (Promise.race (Js.array [|promise|]))##then_final
     (fun result -> wrapper (fun () -> assert_equal result expected_result))
     (fun error  -> wrapper (fun () -> failwith "error detected"))
 
@@ -94,7 +94,7 @@ let test_race_reject_one wrapper =
   let promise =
     new%js Promise.promise (fun _ reject -> reject expected_error) in
 
-  (Promise.race (Js.array [|promise|]))##then_
+  (Promise.race (Js.array [|promise|]))##then_final
     (fun result -> wrapper (fun () -> failwith "result returned"))
     (fun error  -> wrapper (fun () -> assert_equal error expected_error))
 
@@ -106,7 +106,7 @@ let test_race_resolve_two wrapper =
   let promise2 =
     new%js Promise.promise (fun _ _ -> ()) in
 
-  (Promise.race (Js.array [|promise1; promise2|]))##then_
+  (Promise.race (Js.array [|promise1; promise2|]))##then_final
     (fun result -> wrapper (fun () -> assert_equal result expected_result))
     (fun error  -> wrapper (fun () -> failwith "error detected"))
 
@@ -118,7 +118,7 @@ let test_race_reject_two wrapper =
   let promise2 =
     new%js Promise.promise (fun _ _ -> ()) in
 
-  (Promise.race (Js.array [|promise1; promise2|]))##then_
+  (Promise.race (Js.array [|promise1; promise2|]))##then_final
     (fun result -> wrapper (fun () -> failwith "result returned"))
     (fun error  -> wrapper (fun () -> assert_equal error expected_error))
 
@@ -135,7 +135,7 @@ let test_resolve wrapper =
   let expected_result = 42 in
   let promise = Promise.resolve expected_result in
 
-  promise##then_
+  promise##then_final
     (fun result -> wrapper (fun () -> assert_equal result expected_result))
     (fun error  -> wrapper (fun () -> failwith "error detected"))
 
@@ -149,7 +149,7 @@ let test_reject wrapper =
   let expected_error = new%js Js.error_constr (Js.string "error") in
   let promise = Promise.reject expected_error in
 
-  promise##then_
+  promise##then_final
     (fun result -> wrapper (fun () -> failwith "result returned"))
     (fun error  -> wrapper (fun () -> assert_equal error expected_error))
 
@@ -162,7 +162,7 @@ let reject =
 let suite =
   "base_suite" >::: [
     environment;
-    then_;
+    then_final;
     all;
     race;
     resolve;

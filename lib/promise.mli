@@ -1,5 +1,5 @@
 class type ['a, 'b] promise = object
-  method then_ : ('a -> unit) -> ('b -> unit) -> unit Js.meth
+  method then_final : ('a -> unit) -> ('b -> unit) -> unit Js.meth
 end
 
 type 'a resolve = 'a -> unit
