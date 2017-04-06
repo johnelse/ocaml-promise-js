@@ -39,6 +39,42 @@ let then_final =
     "test_reject_then_final" >:~ test_reject_then_final;
   ]
 
+let test_resolve_chained wrapper =
+  let initial_value = 4 in
+
+  let promise1 =
+    new%js Promise.promise (fun resolve _ -> resolve initial_value) in
+
+  let promise2 = promise1##then_2
+    (fun result -> result * result)
+    (fun error  -> error)
+  in
+
+  promise2##then_final
+    (fun result -> wrapper (fun () -> assert_equal result 16))
+    (fun error  -> wrapper (fun () -> failwith "error detected"))
+
+let test_reject_chained wrapper =
+  let initial_error = Failure "error" in
+
+  let promise1 =
+    new%js Promise.promise (fun _ reject -> reject initial_error) in
+
+  let promise2 = promise1##then_2
+    (fun result -> failwith "error did not propagate")
+    (fun error  -> Js.string "success")
+  in
+
+  promise2##then_final
+    (fun result -> wrapper (fun () -> assert_equal result (Js.string "success")))
+    (fun error  -> wrapper (fun () -> failwith "error not handled"))
+
+let then_2 =
+  "then_2" >::: [
+    "test_resolve_chained" >:~ test_resolve_chained;
+    "test_reject_chained" >:~ test_reject_chained;
+  ]
+
 let test_all_resolve wrapper =
   let result1 = 1 in
   let result2 = 2 in
@@ -163,6 +199,7 @@ let suite =
   "base_suite" >::: [
     environment;
     then_final;
+    then_2;
     all;
     race;
     resolve;
