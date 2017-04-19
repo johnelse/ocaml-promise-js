@@ -39,6 +39,23 @@ let then_final =
     "test_reject_then_final" >:~ test_reject_then_final;
   ]
 
+let test_catch wrapper =
+  let expected_result = 123 in
+
+  let promise1 =
+    new%js Promise.promise (fun _ reject -> reject (Js.string "error")) in
+
+  let promise2 = promise1##catch (fun _ -> expected_result) in
+
+  promise2##then_final
+    (fun result -> wrapper (fun () -> assert_equal result expected_result))
+    (fun error  -> wrapper (fun () -> failwith "error detected"))
+
+let catch =
+  "catch" >::: [
+    "test_catch" >:~ test_catch;
+  ]
+
 let test_resolve_chained wrapper =
   let initial_value = 4 in
 
@@ -231,6 +248,7 @@ let suite =
   "base_suite" >::: [
     environment;
     then_final;
+    catch;
     then_1;
     then_2;
     all;

@@ -1,4 +1,6 @@
 class type ['a, 'b] promise = object
+  method catch : ('b -> 'a) -> ('a, 'b) promise Js.t Js.meth
+
   method then_1 : ('a -> 'c) -> ('c, 'b) promise Js.t Js.meth
   method then_2 : ('a -> 'c) -> ('b -> 'c) -> ('c, 'b) promise Js.t Js.meth
   method then_final : ('a -> unit) -> ('b -> unit) -> unit Js.meth
