@@ -45,6 +45,38 @@ let test_resolve_chained wrapper =
   let promise1 =
     new%js Promise.promise (fun resolve _ -> resolve initial_value) in
 
+  let promise2 = promise1##then_1 (fun result -> result * result) in
+
+  promise2##then_final
+    (fun result -> wrapper (fun () -> assert_equal result 16))
+    (fun error  -> wrapper (fun () -> failwith "error detected"))
+
+let test_resolve_chained_twice wrapper =
+  let initial_value = 4 in
+
+  let promise1 =
+    new%js Promise.promise (fun resolve _ -> resolve initial_value) in
+
+  let promise2 = promise1##then_1 (fun result -> result * result) in
+
+  let promise3 = promise2##then_1 (fun result -> result * result) in
+
+  promise3##then_final
+    (fun result -> wrapper (fun () -> assert_equal result 256))
+    (fun error  -> wrapper (fun () -> failwith "error detected"))
+
+let then_1 =
+  "then_1" >::: [
+    "test_resolve_chained" >:~ test_resolve_chained;
+    "test_resolve_chained_twice" >:~ test_resolve_chained_twice;
+  ]
+
+let test_resolve_chained wrapper =
+  let initial_value = 4 in
+
+  let promise1 =
+    new%js Promise.promise (fun resolve _ -> resolve initial_value) in
+
   let promise2 = promise1##then_2
     (fun result -> result * result)
     (fun error  -> error)
@@ -199,6 +231,7 @@ let suite =
   "base_suite" >::: [
     environment;
     then_final;
+    then_1;
     then_2;
     all;
     race;
