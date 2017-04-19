@@ -4,7 +4,7 @@ Name:        promise-js
 Version:     0.1.0
 Authors:     John Else
 License:     MIT
-Synopsis:    OCaml bindings for the Javascript Promise API
+Synopsis:    OCaml bindings for the JavaScript Promise API
 Plugins:     META (0.4), DevFiles (0.4)
 BuildTools:  ocamlbuild
 
