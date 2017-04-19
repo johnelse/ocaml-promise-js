@@ -13,7 +13,7 @@ let environment =
     "test_constructor" >:: test_constructor;
   ]
 
-let test_then_resolve wrapper =
+let test_resolve_then_final wrapper =
   let expected_result = Js.string "ok" in
 
   let promise =
@@ -23,7 +23,7 @@ let test_then_resolve wrapper =
     (fun result -> wrapper (fun () -> assert_equal result expected_result))
     (fun error  -> wrapper (fun () -> failwith "error detected"))
 
-let test_then_reject wrapper =
+let test_reject_then_final wrapper =
   let expected_error = new%js Js.error_constr (Js.string "error") in
 
   let promise =
@@ -35,8 +35,8 @@ let test_then_reject wrapper =
 
 let then_final =
   "then_final" >::: [
-    "test_then_resolve" >:~ test_then_resolve;
-    "test_then_reject" >:~ test_then_reject;
+    "test_resolve_then_final" >:~ test_resolve_then_final;
+    "test_reject_then_final" >:~ test_reject_then_final;
   ]
 
 let test_all_resolve wrapper =
