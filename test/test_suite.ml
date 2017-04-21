@@ -124,6 +124,42 @@ let then_2 =
     "test_reject_chained" >:~ test_reject_chained;
   ]
 
+let test_then_catch_ok wrapper =
+  let initial_value = 4 in
+
+  let promise1 =
+    new%js Promise.promise (fun resolve _ -> resolve initial_value) in
+
+  let promise2 = promise1##then_1
+    (fun result -> result * result) in
+
+  let promise3 = promise2##catch
+    (fun error -> failwith "error detected") in
+
+  promise3##then_final
+    (fun result -> wrapper (fun () -> assert_equal result 16))
+    (fun error  -> wrapper (fun () -> failwith "error detected"))
+
+let test_then_catch_error wrapper =
+  let promise1 =
+    new%js Promise.promise (fun _ reject -> reject (Js.string "error")) in
+
+  let promise2 = promise1##then_1
+    (fun result -> result * result) in
+
+  let promise3 = promise2##catch
+    (fun error -> 256) in
+
+  promise3##then_final
+    (fun result -> wrapper (fun () -> assert_equal result 256))
+    (fun error  -> wrapper (fun () -> failwith "error detected"))
+
+let assorted_chaining =
+  "assorted_chaining" >::: [
+    "test_then_catch_ok" >:~ test_then_catch_ok;
+    "test_then_catch_error" >:~ test_then_catch_error;
+  ]
+
 let test_all_resolve wrapper =
   let result1 = 1 in
   let result2 = 2 in
@@ -251,6 +287,7 @@ let suite =
     catch;
     then_1;
     then_2;
+    assorted_chaining;
     all;
     race;
     resolve;
