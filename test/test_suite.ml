@@ -58,7 +58,7 @@ let test_resolve_chained wrapper =
 
   let promise1 = Promise.make (fun resolve _ -> resolve initial_value) in
 
-  let promise2 = Promise.then_1 promise1 (fun result -> result * result) in
+  let promise2 = Promise.then_1_map promise1 (fun result -> result * result) in
 
   Promise.then_final promise2
     (fun result -> wrapper (fun () -> assert_equal result 16))
@@ -69,16 +69,16 @@ let test_resolve_chained_twice wrapper =
 
   let promise1 = Promise.make (fun resolve _ -> resolve initial_value) in
 
-  let promise2 = Promise.then_1 promise1 (fun result -> result * result) in
+  let promise2 = Promise.then_1_map promise1 (fun result -> result * result) in
 
-  let promise3 = Promise.then_1 promise2 (fun result -> result > 10) in
+  let promise3 = Promise.then_1_map promise2 (fun result -> result > 10) in
 
   Promise.then_final promise3
     (fun result -> wrapper (fun () -> assert_true result))
     (fun error  -> wrapper (fun () -> failwith "error detected"))
 
-let then_1 =
-  "then_1" >::: [
+let then_1_map =
+  "then_1_map " >::: [
     "test_resolve_chained" >:~ test_resolve_chained;
     "test_resolve_chained_twice" >:~ test_resolve_chained_twice;
   ]
@@ -88,7 +88,7 @@ let test_resolve_chained wrapper =
 
   let promise1 = Promise.make (fun resolve _ -> resolve initial_value) in
 
-  let promise2 = Promise.then_2 promise1
+  let promise2 = Promise.then_2_map promise1
     (fun result -> result * result)
     (fun error  -> error)
   in
@@ -102,7 +102,7 @@ let test_reject_chained wrapper =
 
   let promise1 = Promise.make (fun _ reject -> reject initial_error) in
 
-  let promise2 = Promise.then_2 promise1
+  let promise2 = Promise.then_2_map promise1
     (fun result -> failwith "error did not propagate")
     (fun error  -> Js.string "success")
   in
@@ -111,8 +111,8 @@ let test_reject_chained wrapper =
     (fun result -> wrapper (fun () -> assert_equal result (Js.string "success")))
     (fun error  -> wrapper (fun () -> failwith "error not handled"))
 
-let then_2 =
-  "then_2" >::: [
+let then_2_map =
+  "then_2_map" >::: [
     "test_resolve_chained" >:~ test_resolve_chained;
     "test_reject_chained" >:~ test_reject_chained;
   ]
@@ -122,7 +122,7 @@ let test_then_catch_ok wrapper =
 
   let promise1 = Promise.make (fun resolve _ -> resolve initial_value) in
 
-  let promise2 = Promise.then_1 promise1
+  let promise2 = Promise.then_1_map promise1
     (fun result -> result * result) in
 
   let promise3 = Promise.catch promise2
@@ -135,7 +135,7 @@ let test_then_catch_ok wrapper =
 let test_then_catch_error wrapper =
   let promise1 = Promise.make (fun _ reject -> reject (Js.string "error")) in
 
-  let promise2 = Promise.then_1 promise1
+  let promise2 = Promise.then_1_map promise1
     (fun result -> result * result) in
 
   let promise3 = Promise.catch promise2
@@ -270,8 +270,8 @@ let suite =
     environment;
     then_final;
     catch;
-    then_1;
-    then_2;
+    then_1_map;
+    then_2_map;
     assorted_chaining;
     all;
     race;
