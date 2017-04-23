@@ -41,6 +41,25 @@ module Then_final = struct
     ]
 end
 
+module Catch_bind = struct
+  let test_catch wrapper =
+    let expected_result = 123 in
+
+    let promise1 = Promise.make (fun _ reject -> reject (Js.string "error")) in
+
+    let promise2 =
+      Promise.catch_bind promise1 (fun _ -> Promise.resolve expected_result) in
+
+    Promise.then_final promise2
+      (fun result -> wrapper (fun () -> assert_equal result expected_result))
+      (fun error  -> wrapper (fun () -> failwith "error detected"))
+
+  let suite =
+    "catch_bind" >::: [
+      "test_catch" >:~ test_catch;
+    ]
+end
+
 module Catch_map = struct
   let test_catch wrapper =
     let expected_result = 123 in
@@ -356,6 +375,7 @@ let suite =
     Then_1_bind.suite;
     Then_2_map.suite;
     Then_2_bind.suite;
+    Catch_bind.suite;
     Catch_map.suite;
     Assorted_chaining.suite;
     All.suite;

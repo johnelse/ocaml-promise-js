@@ -25,6 +25,8 @@ val then_2_bind :
 
 val then_2_map : ('a, 'b) promise -> ('a -> 'c) -> ('b -> 'c)-> ('c, 'b) promise
 
+val catch_bind : ('a, 'b) promise -> ('b -> ('a, 'b) promise) -> ('a, 'b) promise
+
 val catch_map : ('a, 'b) promise -> ('b -> 'a) -> ('a, 'b) promise
 
 val then_final : ('a, 'b) promise -> ('a -> unit) -> ('b -> unit)-> unit

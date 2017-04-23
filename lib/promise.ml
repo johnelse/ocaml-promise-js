@@ -33,6 +33,9 @@ let then_2_map promise f_ok f_error =
     promise "then"
     [|Js.Unsafe.inject f_ok; Js.Unsafe.inject f_error|]
 
+let catch_bind promise f_error =
+  Js.Unsafe.meth_call promise "catch" [|Js.Unsafe.inject f_error|]
+
 let catch_map promise f_error =
   Js.Unsafe.meth_call promise "catch" [|Js.Unsafe.inject f_error|]
 
