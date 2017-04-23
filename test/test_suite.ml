@@ -41,20 +41,20 @@ module Then_final = struct
     ]
 end
 
-module Catch = struct
+module Catch_map = struct
   let test_catch wrapper =
     let expected_result = 123 in
 
     let promise1 = Promise.make (fun _ reject -> reject (Js.string "error")) in
 
-    let promise2 = Promise.catch promise1 (fun _ -> expected_result) in
+    let promise2 = Promise.catch_map promise1 (fun _ -> expected_result) in
 
     Promise.then_final promise2
       (fun result -> wrapper (fun () -> assert_equal result expected_result))
       (fun error  -> wrapper (fun () -> failwith "error detected"))
 
   let suite =
-    "catch" >::: [
+    "catch_map" >::: [
       "test_catch" >:~ test_catch;
     ]
 end
@@ -199,7 +199,7 @@ module Assorted_chaining = struct
     let promise2 = Promise.then_1_map promise1
       (fun result -> result * result) in
 
-    let promise3 = Promise.catch promise2
+    let promise3 = Promise.catch_map promise2
       (fun error -> failwith "error detected") in
 
     Promise.then_final promise3
@@ -212,7 +212,7 @@ module Assorted_chaining = struct
     let promise2 = Promise.then_1_map promise1
       (fun result -> result * result) in
 
-    let promise3 = Promise.catch promise2
+    let promise3 = Promise.catch_map promise2
       (fun error -> 256) in
 
     Promise.then_final promise3
@@ -352,11 +352,11 @@ let suite =
   "base_suite" >::: [
     Environment.suite;
     Then_final.suite;
-    Catch.suite;
     Then_1_map.suite;
     Then_1_bind.suite;
     Then_2_map.suite;
     Then_2_bind.suite;
+    Catch_map.suite;
     Assorted_chaining.suite;
     All.suite;
     Race.suite;

@@ -12,8 +12,6 @@ val resolve : 'a -> ('a, 'b) promise
 
 val reject : 'b -> ('a, 'b) promise
 
-val catch : ('a, 'b) promise -> ('b -> 'a) -> ('a, 'b) promise
-
 val then_1_bind :
   ('a, 'b) promise -> ('a -> ('c ,'b) promise) -> ('c, 'b) promise
 
@@ -26,6 +24,8 @@ val then_2_bind :
   ('c, 'b) promise
 
 val then_2_map : ('a, 'b) promise -> ('a -> 'c) -> ('b -> 'c)-> ('c, 'b) promise
+
+val catch_map : ('a, 'b) promise -> ('b -> 'a) -> ('a, 'b) promise
 
 val then_final : ('a, 'b) promise -> ('a -> unit) -> ('b -> unit)-> unit
 
