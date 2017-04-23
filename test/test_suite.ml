@@ -59,6 +59,33 @@ module Catch = struct
     ]
 end
 
+module Then_1_bind = struct
+  let test_resolve wrapper =
+    let promise1 = Promise.resolve 4 in
+    let promise2 =
+      Promise.then_1_bind promise1 (fun x -> Promise.resolve (x * x)) in
+
+    Promise.then_final promise2
+      (fun result -> wrapper (fun () -> assert_equal result 16))
+      (fun error  -> wrapper (fun () -> failwith "error detected"))
+
+  let test_reject wrapper =
+    let promise1 = Promise.resolve 4 in
+    let promise2 =
+      Promise.then_1_bind promise1 (fun x -> Promise.reject (Js.string "error"))
+    in
+
+    Promise.then_final promise2
+      (fun result -> wrapper (fun () -> failwith "error did not propagate"))
+      (fun error  -> wrapper (fun () -> assert_equal error (Js.string "error")))
+
+  let suite =
+    "then_1_bind" >::: [
+      "test_resolve" >:~ test_resolve;
+      "test_reject" >:~ test_reject;
+    ]
+end
+
 module Then_1_map = struct
   let test_resolve_chained wrapper =
     let initial_value = 4 in
@@ -88,6 +115,42 @@ module Then_1_map = struct
     "then_1_map " >::: [
       "test_resolve_chained" >:~ test_resolve_chained;
       "test_resolve_chained_twice" >:~ test_resolve_chained_twice;
+    ]
+end
+
+module Then_2_bind = struct
+  let test_resolve_chained wrapper =
+    let initial_value = 4 in
+
+    let promise1 = Promise.make (fun resolve _ -> resolve initial_value) in
+
+    let promise2 = Promise.then_2_bind promise1
+      (fun result -> Promise.resolve (result * result))
+      (fun error  -> Promise.reject error)
+    in
+
+    Promise.then_final promise2
+      (fun result -> wrapper (fun () -> assert_equal result 16))
+      (fun error  -> wrapper (fun () -> failwith "error detected"))
+
+  let test_reject_chained wrapper =
+    let initial_error = Failure "error" in
+
+    let promise1 = Promise.make (fun _ reject -> reject initial_error) in
+
+    let promise2 = Promise.then_2_bind promise1
+      (fun result -> failwith "error did not propagate")
+      (fun error  -> Promise.resolve (Js.string "success"))
+    in
+
+    Promise.then_final promise2
+      (fun result -> wrapper (fun () -> assert_equal result (Js.string "success")))
+      (fun error  -> wrapper (fun () -> failwith "error not handled"))
+
+  let suite =
+    "then_2_bind" >::: [
+      "test_resolve_chained" >:~ test_resolve_chained;
+      "test_reject_chained" >:~ test_reject_chained;
     ]
 end
 
@@ -291,7 +354,9 @@ let suite =
     Then_final.suite;
     Catch.suite;
     Then_1_map.suite;
+    Then_1_bind.suite;
     Then_2_map.suite;
+    Then_2_bind.suite;
     Assorted_chaining.suite;
     All.suite;
     Race.suite;

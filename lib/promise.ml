@@ -20,8 +20,16 @@ let reject value =
 let catch promise f_error =
   Js.Unsafe.meth_call promise "catch" [|Js.Unsafe.inject f_error|]
 
+let then_1_bind promise f_ok =
+  Js.Unsafe.meth_call promise "then" [|Js.Unsafe.inject f_ok|]
+
 let then_1_map promise f_ok =
   Js.Unsafe.meth_call promise "then" [|Js.Unsafe.inject f_ok|]
+
+let then_2_bind promise f_ok f_error =
+  Js.Unsafe.meth_call
+    promise "then"
+    [|Js.Unsafe.inject f_ok; Js.Unsafe.inject f_error|]
 
 let then_2_map promise f_ok f_error =
   Js.Unsafe.meth_call
