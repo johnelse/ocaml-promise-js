@@ -54,3 +54,13 @@ let all promises =
 let race promises =
   Js.Unsafe.fun_call promise_global##.race
     [|Js.Unsafe.inject (Js.array promises)|]
+
+module Infix = struct
+  let (>>=) = then_1_bind
+  let (>|=) = then_1_map
+
+  let (>>~) = catch_bind
+  let (>|~) = catch_map
+
+  let (>||) promise (f_ok, f_error) = then_final promise f_ok f_error
+end

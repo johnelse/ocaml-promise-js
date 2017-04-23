@@ -34,3 +34,13 @@ val then_final : ('a, 'b) promise -> ('a -> unit) -> ('b -> unit)-> unit
 val all : (('a, 'b) promise) array -> ('a array, 'b) promise
 
 val race : (('a, 'b) promise) array -> ('a, 'b) promise
+
+module Infix : sig
+  val (>>=) : ('a, 'b) promise -> ('a -> ('c ,'b) promise) -> ('c, 'b) promise
+  val (>|=) : ('a, 'b) promise -> ('a -> 'c) -> ('c, 'b) promise
+
+  val (>>~) : ('a, 'b) promise -> ('b -> ('a, 'b) promise) -> ('a, 'b) promise
+  val (>|~) : ('a, 'b) promise -> ('b -> 'a) -> ('a, 'b) promise
+
+  val (>||) : ('a, 'b) promise -> ('a -> unit) * ('b -> unit) -> unit
+end

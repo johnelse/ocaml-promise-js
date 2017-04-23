@@ -367,6 +367,90 @@ module Reject = struct
       ]
 end
 
+module Infix = struct
+  let test_resolve_then_bind wrapper =
+    let open Promise.Infix in
+
+    Promise.resolve 4
+    >>= (fun x -> Promise.resolve (x * x))
+    >|| (
+      (fun result -> wrapper (fun () -> assert_equal result 16)),
+      (fun error  -> wrapper (fun () -> failwith "error detected"))
+    )
+
+  let test_reject_then_bind wrapper =
+    let open Promise.Infix in
+
+    Promise.resolve 4
+    >>= (fun x -> Promise.reject (Js.string "error"))
+    >|| (
+      (fun result -> wrapper (fun () -> failwith "result returned")),
+      (fun error  -> wrapper (fun () -> assert_equal error (Js.string "error")))
+    )
+
+  let test_resolve_then_map wrapper =
+    let open Promise.Infix in
+
+    Promise.resolve 4
+    >|= (fun x -> x * x)
+    >|| (
+      (fun result -> wrapper (fun () -> assert_equal result 16)),
+      (fun error  -> wrapper (fun () -> failwith "error detected"))
+    )
+
+  let test_resolve_catch_bind wrapper =
+    let open Promise.Infix in
+
+    Promise.resolve 4
+    >>~ (fun error -> Promise.resolve 16)
+    >|| (
+      (fun result -> wrapper (fun () -> assert_equal result 4)),
+      (fun error  -> wrapper (fun () -> failwith "error detected"))
+    )
+
+  let test_reject_catch_bind wrapper =
+    let open Promise.Infix in
+
+    Promise.reject (Js.string "error")
+    >>~ (fun error -> Promise.resolve 16)
+    >|| (
+      (fun result -> wrapper (fun () -> assert_equal result 16)),
+      (fun error  -> wrapper (fun () -> failwith "error detected"))
+    )
+
+  let test_resolve_catch_map wrapper =
+    let open Promise.Infix in
+
+    Promise.resolve 4
+    >|~ (fun error -> 16)
+    >|| (
+      (fun result -> wrapper (fun () -> assert_equal result 4)),
+      (fun error  -> wrapper (fun () -> failwith "error detected"))
+    )
+
+  let test_reject_catch_map wrapper =
+    let open Promise.Infix in
+
+    Promise.reject (Js.string "error")
+    >|~ (fun error -> 16)
+    >|| (
+      (fun result -> wrapper (fun () -> assert_equal result 16)),
+      (fun error  -> wrapper (fun () -> failwith "error detected"))
+    )
+
+  let suite =
+    "operators" >:::
+      [
+        "test_resolve_then_bind" >:~ test_resolve_then_bind;
+        "test_reject_then_bind" >:~ test_reject_then_bind;
+        "test_resolve_then_map" >:~ test_resolve_then_map;
+        "test_resolve_catch_bind" >:~ test_resolve_catch_bind;
+        "test_reject_catch_bind" >:~ test_reject_catch_bind;
+        "test_resolve_catch_map" >:~ test_resolve_catch_map;
+        "test_reject_catch_map" >:~ test_reject_catch_map;
+      ]
+end
+
 let suite =
   "base_suite" >::: [
     Environment.suite;
@@ -381,5 +465,6 @@ let suite =
     All.suite;
     Race.suite;
     Resolve.suite;
-    Reject.suite
+    Reject.suite;
+    Infix.suite;
   ]
