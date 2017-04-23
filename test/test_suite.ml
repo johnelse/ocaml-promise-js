@@ -71,10 +71,10 @@ let test_resolve_chained_twice wrapper =
 
   let promise2 = Promise.then_1 promise1 (fun result -> result * result) in
 
-  let promise3 = Promise.then_1 promise2 (fun result -> result * result) in
+  let promise3 = Promise.then_1 promise2 (fun result -> result > 10) in
 
   Promise.then_final promise3
-    (fun result -> wrapper (fun () -> assert_equal result 256))
+    (fun result -> wrapper (fun () -> assert_true result))
     (fun error  -> wrapper (fun () -> failwith "error detected"))
 
 let then_1 =
