@@ -46,7 +46,6 @@ module Catch_bind = struct
     let expected_result = 123 in
 
     let promise1 = Promise.make (fun _ reject -> reject (Js.string "error")) in
-
     let promise2 =
       Promise.catch_bind promise1 (fun _ -> Promise.resolve expected_result) in
 
@@ -65,7 +64,6 @@ module Catch_map = struct
     let expected_result = 123 in
 
     let promise1 = Promise.make (fun _ reject -> reject (Js.string "error")) in
-
     let promise2 = Promise.catch_map promise1 (fun _ -> expected_result) in
 
     Promise.then_final promise2
@@ -110,7 +108,6 @@ module Then_1_map = struct
     let initial_value = 4 in
 
     let promise1 = Promise.make (fun resolve _ -> resolve initial_value) in
-
     let promise2 = Promise.then_1_map promise1 (fun result -> result * result) in
 
     Promise.then_final promise2
@@ -121,9 +118,7 @@ module Then_1_map = struct
     let initial_value = 4 in
 
     let promise1 = Promise.make (fun resolve _ -> resolve initial_value) in
-
     let promise2 = Promise.then_1_map promise1 (fun result -> result * result) in
-
     let promise3 = Promise.then_1_map promise2 (fun result -> result > 10) in
 
     Promise.then_final promise3
@@ -142,7 +137,6 @@ module Then_2_bind = struct
     let initial_value = 4 in
 
     let promise1 = Promise.make (fun resolve _ -> resolve initial_value) in
-
     let promise2 = Promise.then_2_bind promise1
       (fun result -> Promise.resolve (result * result))
       (fun error  -> Promise.reject error)
@@ -156,7 +150,6 @@ module Then_2_bind = struct
     let initial_error = Failure "error" in
 
     let promise1 = Promise.make (fun _ reject -> reject initial_error) in
-
     let promise2 = Promise.then_2_bind promise1
       (fun result -> failwith "error did not propagate")
       (fun error  -> Promise.resolve (Js.string "success"))
@@ -178,7 +171,6 @@ module Then_2_map = struct
     let initial_value = 4 in
 
     let promise1 = Promise.make (fun resolve _ -> resolve initial_value) in
-
     let promise2 = Promise.then_2_map promise1
       (fun result -> result * result)
       (fun error  -> error)
@@ -192,7 +184,6 @@ module Then_2_map = struct
     let initial_error = Failure "error" in
 
     let promise1 = Promise.make (fun _ reject -> reject initial_error) in
-
     let promise2 = Promise.then_2_map promise1
       (fun result -> failwith "error did not propagate")
       (fun error  -> Js.string "success")
@@ -214,10 +205,8 @@ module Assorted_chaining = struct
     let initial_value = 4 in
 
     let promise1 = Promise.make (fun resolve _ -> resolve initial_value) in
-
     let promise2 = Promise.then_1_map promise1
       (fun result -> result * result) in
-
     let promise3 = Promise.catch_map promise2
       (fun error -> failwith "error detected") in
 
@@ -227,12 +216,9 @@ module Assorted_chaining = struct
 
   let test_then_catch_error wrapper =
     let promise1 = Promise.make (fun _ reject -> reject (Js.string "error")) in
-
     let promise2 = Promise.then_1_map promise1
       (fun result -> result * result) in
-
-    let promise3 = Promise.catch_map promise2
-      (fun error -> 256) in
+    let promise3 = Promise.catch_map promise2 (fun error -> 256) in
 
     Promise.then_final promise3
       (fun result -> wrapper (fun () -> assert_equal result 256))
