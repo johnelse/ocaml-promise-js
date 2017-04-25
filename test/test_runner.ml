@@ -312,13 +312,12 @@ module Race = struct
       (fun error  -> wrapper (fun () -> assert_equal error expected_error))
 
   let suite =
-    "race" >:::
-      [
-        "test_race_resolve_one" >:~ test_race_resolve_one;
-        "test_race_reject_one" >:~ test_race_reject_one;
-        "test_race_resolve_two" >:~ test_race_resolve_two;
-        "test_race_reject_two" >:~ test_race_reject_two;
-      ]
+    "race" >::: [
+      "test_race_resolve_one" >:~ test_race_resolve_one;
+      "test_race_reject_one" >:~ test_race_reject_one;
+      "test_race_resolve_two" >:~ test_race_resolve_two;
+      "test_race_reject_two" >:~ test_race_reject_two;
+    ]
 end
 
 module Resolve = struct
@@ -331,10 +330,9 @@ module Resolve = struct
       (fun error  -> wrapper (fun () -> failwith "error detected"))
 
   let suite =
-    "resolve" >:::
-      [
-        "test_resolve" >:~ test_resolve;
-      ]
+    "resolve" >::: [
+      "test_resolve" >:~ test_resolve;
+    ]
 end
 
 module Reject = struct
@@ -347,10 +345,9 @@ module Reject = struct
       (fun error  -> wrapper (fun () -> assert_equal error expected_error))
 
   let suite =
-    "reject" >:::
-      [
-        "test_reject" >:~ test_reject;
-      ]
+    "reject" >::: [
+      "test_reject" >:~ test_reject;
+    ]
 end
 
 module Infix = struct
@@ -425,16 +422,15 @@ module Infix = struct
     )
 
   let suite =
-    "operators" >:::
-      [
-        "test_resolve_then_bind" >:~ test_resolve_then_bind;
-        "test_reject_then_bind" >:~ test_reject_then_bind;
-        "test_resolve_then_map" >:~ test_resolve_then_map;
-        "test_resolve_catch_bind" >:~ test_resolve_catch_bind;
-        "test_reject_catch_bind" >:~ test_reject_catch_bind;
-        "test_resolve_catch_map" >:~ test_resolve_catch_map;
-        "test_reject_catch_map" >:~ test_reject_catch_map;
-      ]
+    "operators" >::: [
+      "test_resolve_then_bind" >:~ test_resolve_then_bind;
+      "test_reject_then_bind" >:~ test_reject_then_bind;
+      "test_resolve_then_map" >:~ test_resolve_then_map;
+      "test_resolve_catch_bind" >:~ test_resolve_catch_bind;
+      "test_reject_catch_bind" >:~ test_reject_catch_bind;
+      "test_resolve_catch_map" >:~ test_resolve_catch_map;
+      "test_reject_catch_map" >:~ test_reject_catch_map;
+    ]
 end
 
 let suite =
