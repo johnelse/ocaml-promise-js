@@ -17,31 +17,26 @@ let resolve value =
 let reject value =
   Js.Unsafe.fun_call promise_global##.reject [|Js.Unsafe.inject value|]
 
-let then_1_bind promise on_fulfilled =
-  Js.Unsafe.meth_call promise "then" [|Js.Unsafe.inject on_fulfilled|]
+let js_of_opt = function
+  | Some value -> Js.Unsafe.inject value
+  | None       -> Js.Unsafe.inject Js.undefined
 
-let then_1_map promise on_fulfilled =
-  Js.Unsafe.meth_call promise "then" [|Js.Unsafe.inject on_fulfilled|]
+let then_bind ?on_fulfilled ?on_rejected promise =
+  Js.Unsafe.meth_call promise "then"
+    [|js_of_opt on_fulfilled; js_of_opt on_rejected|]
 
-let then_2_bind promise on_fulfilled on_rejected =
-  Js.Unsafe.meth_call
-    promise "then"
-    [|Js.Unsafe.inject on_fulfilled; Js.Unsafe.inject on_rejected|]
+let then_map ?on_fulfilled ?on_rejected promise =
+  Js.Unsafe.meth_call promise "then"
+    [|js_of_opt on_fulfilled; js_of_opt on_rejected|]
 
-let then_2_map promise on_fulfilled on_rejected =
-  Js.Unsafe.meth_call
-    promise "then"
-    [|Js.Unsafe.inject on_fulfilled; Js.Unsafe.inject on_rejected|]
+let catch_bind ~on_rejected promise =
+  then_bind ~on_rejected promise
 
-let catch_bind promise on_rejected =
-  Js.Unsafe.meth_call promise "catch" [|Js.Unsafe.inject on_rejected|]
+let catch_map ~on_rejected promise =
+  then_map ~on_rejected promise
 
-let catch_map promise on_rejected =
-  Js.Unsafe.meth_call promise "catch" [|Js.Unsafe.inject on_rejected|]
-
-let then_final promise on_fulfilled on_rejected =
-  Js.Unsafe.meth_call
-    promise "then"
+let then_final ~on_fulfilled ~on_rejected promise =
+  Js.Unsafe.meth_call promise "then"
     [|Js.Unsafe.inject on_fulfilled; Js.Unsafe.inject on_rejected|]
 
 let all promises =
@@ -49,19 +44,20 @@ let all promises =
     Js.Unsafe.fun_call promise_global##.all
       [|Js.Unsafe.inject (Js.array promises)|]
   in
-  then_1_map intermediate_promise (fun js_array -> Js.to_array js_array)
+  then_map
+    ~on_fulfilled:(fun js_array -> Js.to_array js_array) intermediate_promise
 
 let race promises =
   Js.Unsafe.fun_call promise_global##.race
     [|Js.Unsafe.inject (Js.array promises)|]
 
 module Infix = struct
-  let (>>=) = then_1_bind
-  let (>|=) = then_1_map
+  let (>>=) promise on_fulfilled = then_bind ~on_fulfilled promise
+  let (>|=) promise on_fulfilled = then_map  ~on_fulfilled promise
 
-  let (>>~) = catch_bind
-  let (>|~) = catch_map
+  let (>>~) promise on_rejected = catch_bind ~on_rejected promise
+  let (>|~) promise on_rejected = catch_map  ~on_rejected promise
 
   let (>||) promise (on_fulfilled, on_rejected) =
-    then_final promise on_fulfilled on_rejected
+    then_final ~on_fulfilled ~on_rejected promise
 end

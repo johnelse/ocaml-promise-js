@@ -12,24 +12,33 @@ val resolve : 'a -> ('a, 'b) promise
 
 val reject : 'b -> ('a, 'b) promise
 
-val then_1_bind :
-  ('a, 'b) promise -> ('a -> ('c ,'b) promise) -> ('c, 'b) promise
-
-val then_1_map : ('a, 'b) promise -> ('a -> 'c) -> ('c, 'b) promise
-
-val then_2_bind :
+val then_bind :
+  ?on_fulfilled:('a -> ('c ,'b) promise) ->
+  ?on_rejected:('b -> ('c, 'b) promise) ->
   ('a, 'b) promise ->
-  ('a -> ('c, 'b) promise) ->
-  ('b -> ('c, 'b) promise) ->
   ('c, 'b) promise
 
-val then_2_map : ('a, 'b) promise -> ('a -> 'c) -> ('b -> 'c)-> ('c, 'b) promise
+val then_map :
+  ?on_fulfilled:('a -> 'c) ->
+  ?on_rejected:('b -> 'c) ->
+  ('a, 'b) promise ->
+  ('c, 'b) promise
 
-val catch_bind : ('a, 'b) promise -> ('b -> ('a, 'b) promise) -> ('a, 'b) promise
+val catch_bind :
+  on_rejected:('b -> ('a, 'b) promise) ->
+  ('a, 'b) promise ->
+  ('a, 'b) promise
 
-val catch_map : ('a, 'b) promise -> ('b -> 'a) -> ('a, 'b) promise
+val catch_map :
+  on_rejected:('b -> 'a) ->
+  ('a, 'b) promise ->
+  ('a, 'b) promise
 
-val then_final : ('a, 'b) promise -> ('a -> unit) -> ('b -> unit)-> unit
+val then_final :
+  on_fulfilled:('a -> unit) ->
+  on_rejected:('b -> unit) ->
+  ('a, 'b) promise ->
+  unit
 
 val all : (('a, 'b) promise) array -> ('a array, 'b) promise
 
