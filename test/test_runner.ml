@@ -447,7 +447,7 @@ module Infix = struct
     )
 
   let suite =
-    "operators" >::: [
+    "infix" >::: [
       "test_resolve_then_bind" >:~ test_resolve_then_bind;
       "test_reject_then_bind" >:~ test_reject_then_bind;
       "test_resolve_then_map" >:~ test_resolve_then_map;
