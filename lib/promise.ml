@@ -17,32 +17,32 @@ let resolve value =
 let reject value =
   Js.Unsafe.fun_call promise_global##.reject [|Js.Unsafe.inject value|]
 
-let then_1_bind promise f_ok =
-  Js.Unsafe.meth_call promise "then" [|Js.Unsafe.inject f_ok|]
+let then_1_bind promise on_fulfilled =
+  Js.Unsafe.meth_call promise "then" [|Js.Unsafe.inject on_fulfilled|]
 
-let then_1_map promise f_ok =
-  Js.Unsafe.meth_call promise "then" [|Js.Unsafe.inject f_ok|]
+let then_1_map promise on_fulfilled =
+  Js.Unsafe.meth_call promise "then" [|Js.Unsafe.inject on_fulfilled|]
 
-let then_2_bind promise f_ok f_error =
+let then_2_bind promise on_fulfilled on_rejected =
   Js.Unsafe.meth_call
     promise "then"
-    [|Js.Unsafe.inject f_ok; Js.Unsafe.inject f_error|]
+    [|Js.Unsafe.inject on_fulfilled; Js.Unsafe.inject on_rejected|]
 
-let then_2_map promise f_ok f_error =
+let then_2_map promise on_fulfilled on_rejected =
   Js.Unsafe.meth_call
     promise "then"
-    [|Js.Unsafe.inject f_ok; Js.Unsafe.inject f_error|]
+    [|Js.Unsafe.inject on_fulfilled; Js.Unsafe.inject on_rejected|]
 
-let catch_bind promise f_error =
-  Js.Unsafe.meth_call promise "catch" [|Js.Unsafe.inject f_error|]
+let catch_bind promise on_rejected =
+  Js.Unsafe.meth_call promise "catch" [|Js.Unsafe.inject on_rejected|]
 
-let catch_map promise f_error =
-  Js.Unsafe.meth_call promise "catch" [|Js.Unsafe.inject f_error|]
+let catch_map promise on_rejected =
+  Js.Unsafe.meth_call promise "catch" [|Js.Unsafe.inject on_rejected|]
 
-let then_final promise f_ok f_error =
+let then_final promise on_fulfilled on_rejected =
   Js.Unsafe.meth_call
     promise "then"
-    [|Js.Unsafe.inject f_ok; Js.Unsafe.inject f_error|]
+    [|Js.Unsafe.inject on_fulfilled; Js.Unsafe.inject on_rejected|]
 
 let all promises =
   let intermediate_promise =
@@ -62,5 +62,6 @@ module Infix = struct
   let (>>~) = catch_bind
   let (>|~) = catch_map
 
-  let (>||) promise (f_ok, f_error) = then_final promise f_ok f_error
+  let (>||) promise (on_fulfilled, on_rejected) =
+    then_final promise on_fulfilled on_rejected
 end
