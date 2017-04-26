@@ -167,7 +167,7 @@ module Then_map = struct
       promise3
 
   let suite =
-    "then_map " >::: [
+    "then_map" >::: [
       "test_resolve" >:~ test_resolve;
       "test_resolve_chained" >:~ test_resolve_chained;
       "test_reject_chained" >:~ test_reject_chained;
