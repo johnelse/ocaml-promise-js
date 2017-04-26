@@ -433,6 +433,58 @@ module Infix = struct
     ]
 end
 
+module Http = struct
+  (* Promise-based wrapper around XmlHttpRequest. *)
+  let get url =
+    Promise.make
+      (fun resolve reject ->
+        let request = XmlHttpRequest.create () in
+        request##_open (Js.string "GET") (Js.string url) Js._true;
+
+        request##.onreadystatechange :=
+          Js.wrap_callback (fun () ->
+            if request##.readyState = XmlHttpRequest.DONE
+            then begin
+              if request##.status == 200
+              then resolve (request##.responseText)
+              else reject (new%js Js.error_constr request##.statusText)
+            end);
+
+        request##send Js.null)
+
+  let test_get_one_url wrapper =
+    let open Promise.Infix in
+
+    get "data/file1"
+      >|| (
+        (fun result ->
+          wrapper (fun () -> assert_equal result (Js.string "file1"))),
+        (fun error  -> wrapper (fun () -> failwith "error detected"))
+      )
+
+  let test_get_three_urls wrapper =
+    let open Promise.Infix in
+
+    Promise.all [|
+      get "data/file1";
+      get "data/file2";
+      get "data/file3";
+    |]
+    >|| (
+      (fun result -> wrapper (fun () ->
+        assert_equal result
+          [|Js.string "file1"; Js.string "file2"; Js.string "file3";|]
+      )),
+      (fun error  -> wrapper (fun () -> failwith "error detected"))
+    )
+
+  let suite =
+    "http" >::: [
+      "test_get_one_url" >:~ test_get_one_url;
+      "test_get_three_urls" >:~ test_get_three_urls;
+    ]
+end
+
 let suite =
   "base_suite" >::: [
     Environment.suite;
@@ -449,6 +501,7 @@ let suite =
     Resolve.suite;
     Reject.suite;
     Infix.suite;
+    Http.suite;
   ]
 
 let () = Webtest_js.Runner.setup suite
