@@ -13,13 +13,13 @@ val resolve : 'a -> ('a, 'b) promise
 val reject : 'b -> ('a, 'b) promise
 
 val then_bind :
-  ?on_fulfilled:('a -> ('c ,'b) promise) ->
+  on_fulfilled:('a -> ('c ,'b) promise) ->
   ?on_rejected:('b -> ('c, 'b) promise) ->
   ('a, 'b) promise ->
   ('c, 'b) promise
 
 val then_map :
-  ?on_fulfilled:('a -> 'c) ->
+  on_fulfilled:('a -> 'c) ->
   ?on_rejected:('b -> 'c) ->
   ('a, 'b) promise ->
   ('c, 'b) promise

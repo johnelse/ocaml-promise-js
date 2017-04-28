@@ -21,19 +21,19 @@ let js_of_opt = function
   | Some value -> Js.Unsafe.inject value
   | None       -> Js.Unsafe.inject Js.undefined
 
-let then_bind ?on_fulfilled ?on_rejected promise =
+let then_bind ~on_fulfilled ?on_rejected promise =
   Js.Unsafe.meth_call promise "then"
-    [|js_of_opt on_fulfilled; js_of_opt on_rejected|]
+    [|Js.Unsafe.inject on_fulfilled; js_of_opt on_rejected|]
 
-let then_map ?on_fulfilled ?on_rejected promise =
+let then_map ~on_fulfilled ?on_rejected promise =
   Js.Unsafe.meth_call promise "then"
-    [|js_of_opt on_fulfilled; js_of_opt on_rejected|]
+    [|Js.Unsafe.inject on_fulfilled; js_of_opt on_rejected|]
 
 let catch_bind ~on_rejected promise =
-  then_bind ~on_rejected promise
+  Js.Unsafe.meth_call promise "catch" [|Js.Unsafe.inject on_rejected|]
 
 let catch_map ~on_rejected promise =
-  then_map ~on_rejected promise
+  Js.Unsafe.meth_call promise "catch" [|Js.Unsafe.inject on_rejected|]
 
 let then_final ~on_fulfilled ~on_rejected promise =
   Js.Unsafe.meth_call promise "then"
