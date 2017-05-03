@@ -483,7 +483,7 @@ module Http = struct
     get "data/file1"
       >|| (
         (fun result ->
-          wrapper (fun () -> assert_equal result (Js.string "file1"))),
+          wrapper (fun () -> assert_equal result (Js.string "file1-contents"))),
         (fun error  -> wrapper (fun () -> failwith "error detected"))
       )
 
@@ -498,7 +498,11 @@ module Http = struct
     >|| (
       (fun result -> wrapper (fun () ->
         assert_equal result
-          [|Js.string "file1"; Js.string "file2"; Js.string "file3";|]
+          [|
+            Js.string "file1-contents";
+            Js.string "file2-contents";
+            Js.string "file3-contents";
+          |]
       )),
       (fun error  -> wrapper (fun () -> failwith "error detected"))
     )
