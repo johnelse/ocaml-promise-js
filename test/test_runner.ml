@@ -266,7 +266,11 @@ module All = struct
     let promise3 = Promise.make (fun resolve _ -> resolve result3) in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> assert_equal ~printer:string_of_int (Array.length result) (Array.length expected_result)))
+      (fun result -> wrapper (fun () ->
+        assert_equal (Array.length result) (Array.length expected_result);
+        assert_equal result.(0) result1;
+        assert_equal result.(1) result2;
+        assert_equal result.(2) result3))
       (fun error  -> wrapper (fun () -> failwith "error detected"))
       (Promise.all [|promise1; promise2; promise3|])
 
@@ -298,7 +302,7 @@ module Race = struct
     let promise = Promise.make (fun resolve _ -> resolve expected_result) in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> assert_equal ~printer:string_of_int result expected_result))
+      (fun result -> wrapper (fun () -> assert_equal result expected_result))
       (fun error  -> wrapper (fun () -> failwith "error detected"))
       (Promise.race [|promise|])
 
