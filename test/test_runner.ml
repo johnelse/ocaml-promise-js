@@ -474,7 +474,7 @@ module Http = struct
           Js.wrap_callback (fun () ->
             if request##.readyState = XmlHttpRequest.DONE
             then begin
-              if request##.status == 200
+              if request##.status = 200
               then resolve (request##.responseText)
               else reject (new%js Js.error_constr request##.statusText)
             end);
