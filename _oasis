@@ -13,7 +13,7 @@ PostCleanCommand:     rm -f test/test_runner.js
 Library "promise-js"
   Path:               lib
   Modules:            Promise
-  BuildDepends:       js_of_ocaml, js_of_ocaml.ppx
+  BuildDepends:       js_of_ocaml, js_of_ocaml-ppx
 
 Executable test_runner
   Build$:             flag(tests)
@@ -24,6 +24,6 @@ Executable test_runner
   Install:            false
 
 Test test
-  PreCommand:         js_of_ocaml test_runner.byte -o test/test_runner.js
+  PreCommand:         js_of_ocaml.exe test_runner.byte -o test/test_runner.js
   Command:            test/test_driver.py
   Run$:               flag(tests)

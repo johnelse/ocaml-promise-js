@@ -1,4 +1,4 @@
-PKG js_of_ocaml js_of_ocaml.ppx webtest.js
+PKG js_of_ocaml js_of_ocaml-ppx webtest.js
 S lib
 S test
 
