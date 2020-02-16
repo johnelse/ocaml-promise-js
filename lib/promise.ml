@@ -1,3 +1,5 @@
+open Js_of_ocaml
+
 type ('a, 'b) promise
 
 type 'a resolve = 'a -> unit
