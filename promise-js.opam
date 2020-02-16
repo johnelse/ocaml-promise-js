@@ -6,30 +6,14 @@ dev-repo: "git://github.com/johnelse/ocaml-promise-js"
 maintainer: "john.else@gmail.com"
 available: [ ocaml-version >= "4.02.1" ]
 build: [
-  [
-    "./configure"
-    "--prefix" prefix
-  ]
-  [make "build"]
+  [ "dune" "build" "-p" name "-j" jobs ]
+  [ "dune" "runtest" ] {with-test}
 ]
-build-test: [
-  [
-    "./configure"
-    "--enable-tests"
-  ]
-  [make "test"]
-]
-install: [
-  [make "PREFIX=%{prefix}%" "install"]
-]
-remove: [
-  ["ocamlfind" "remove" "promise-js"]
-]
+
 depends: [
-  "oasis" {build}
-  "ocamlbuild" {build}
-  "ocamlfind" {build}
+  "dune"
   "js_of_ocaml"
   "js_of_ocaml-ppx"
-  "webtest" {test}
+  "ocaml" {>= "4.02.1"}
+  "webtest-js" {test}
 ]
