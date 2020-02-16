@@ -1,3 +1,4 @@
+open Js_of_ocaml
 open Webtest.Suite
 
 module Environment = struct
@@ -22,8 +23,10 @@ module Then_final = struct
     let promise = Promise.make (fun resolve _ -> resolve expected_result) in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> assert_equal result expected_result))
-      (fun error  -> wrapper (fun () -> failwith "error detected"))
+      ~on_fulfilled:
+        (fun result -> wrapper (fun () -> assert_equal result expected_result))
+      ~on_rejected:
+        (fun _      -> wrapper (fun () -> failwith "error detected"))
       promise
 
   let test_reject_then_final wrapper =
@@ -32,8 +35,10 @@ module Then_final = struct
     let promise = Promise.make (fun _ reject -> reject expected_error) in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> failwith "result returned"))
-      (fun error  -> wrapper (fun () -> assert_equal error expected_error))
+      ~on_fulfilled:
+        (fun _     -> wrapper (fun () -> failwith "result returned"))
+      ~on_rejected:
+        (fun error -> wrapper (fun () -> assert_equal error expected_error))
       promise
 
   let suite =
@@ -52,20 +57,24 @@ module Then_bind = struct
     in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> assert_equal result 16))
-      (fun error  -> wrapper (fun () -> failwith "error detected"))
+      ~on_fulfilled:
+        (fun result -> wrapper (fun () -> assert_equal result 16))
+      ~on_rejected:
+        (fun _      -> wrapper (fun () -> failwith "error detected"))
       promise2
 
   let test_reject wrapper =
     let promise1 = Promise.resolve 4 in
     let promise2 =
       Promise.then_bind
-        ~on_fulfilled:(fun x -> Promise.reject (Js.string "error")) promise1
+        ~on_fulfilled:(fun _ -> Promise.reject (Js.string "error")) promise1
     in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> failwith "error did not propagate"))
-      (fun error  -> wrapper (fun () -> assert_equal error (Js.string "error")))
+      ~on_fulfilled:
+        (fun _     -> wrapper (fun () -> failwith "error did not propagate"))
+      ~on_rejected:
+        (fun error -> wrapper (fun () -> assert_equal error (Js.string "error")))
       promise2
 
    let test_resolve_chained wrapper =
@@ -79,8 +88,10 @@ module Then_bind = struct
     in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> assert_equal result 16))
-      (fun error  -> wrapper (fun () -> failwith "error detected"))
+      ~on_fulfilled:
+        (fun result -> wrapper (fun () -> assert_equal result 16))
+      ~on_rejected:
+        (fun _      -> wrapper (fun () -> failwith "error detected"))
       promise2
 
   let test_reject_chained wrapper =
@@ -88,14 +99,16 @@ module Then_bind = struct
 
     let promise1 = Promise.make (fun _ reject -> reject initial_error) in
     let promise2 = Promise.then_bind
-      ~on_fulfilled:(fun result -> failwith "error did not propagate")
-      ~on_rejected:(fun error  -> Promise.resolve (Js.string "success"))
+      ~on_fulfilled:(fun _ -> failwith "error did not propagate")
+      ~on_rejected: (fun _ -> Promise.resolve (Js.string "success"))
       promise1
     in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> assert_equal result (Js.string "success")))
-      (fun error  -> wrapper (fun () -> failwith "error not handled"))
+      ~on_fulfilled:
+        (fun result -> wrapper (fun () -> assert_equal result (Js.string "success")))
+      ~on_rejected:
+        (fun _      -> wrapper (fun () -> failwith "error not handled"))
       promise2
 
   let suite =
@@ -118,8 +131,10 @@ module Then_map = struct
     in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> assert_equal result 16))
-      (fun error  -> wrapper (fun () -> failwith "error detected"))
+      ~on_fulfilled:
+        (fun result -> wrapper (fun () -> assert_equal result 16))
+      ~on_rejected:
+        (fun _      -> wrapper (fun () -> failwith "error detected"))
       promise2
 
   let test_resolve_chained wrapper =
@@ -133,8 +148,10 @@ module Then_map = struct
     in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> assert_equal result 16))
-      (fun error  -> wrapper (fun () -> failwith "error detected"))
+      ~on_fulfilled:
+        (fun result -> wrapper (fun () -> assert_equal result 16))
+      ~on_rejected:
+        (fun _      -> wrapper (fun () -> failwith "error detected"))
       promise2
 
   let test_reject_chained wrapper =
@@ -142,14 +159,16 @@ module Then_map = struct
 
     let promise1 = Promise.make (fun _ reject -> reject initial_error) in
     let promise2 = Promise.then_map
-      ~on_fulfilled:(fun result -> failwith "error did not propagate")
-      ~on_rejected:(fun error  -> Js.string "success")
+      ~on_fulfilled:(fun _ -> failwith "error did not propagate")
+      ~on_rejected: (fun _ -> Js.string "success")
       promise1
     in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> assert_equal result (Js.string "success")))
-      (fun error  -> wrapper (fun () -> failwith "error not handled"))
+      ~on_fulfilled:
+        (fun result -> wrapper (fun () -> assert_equal result (Js.string "success")))
+      ~on_rejected:
+        (fun _      -> wrapper (fun () -> failwith "error not handled"))
       promise2
 
   let test_resolve_chained_twice wrapper =
@@ -162,8 +181,10 @@ module Then_map = struct
       Promise.then_map ~on_fulfilled:(fun result -> result > 10) promise2 in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> assert_true result))
-      (fun error  -> wrapper (fun () -> failwith "error detected"))
+      ~on_fulfilled:
+        (fun result -> wrapper (fun () -> assert_true result))
+      ~on_rejected:
+        (fun _      -> wrapper (fun () -> failwith "error detected"))
       promise3
 
   let suite =
@@ -181,11 +202,14 @@ module Catch_bind = struct
 
     let promise1 = Promise.make (fun _ reject -> reject (Js.string "error")) in
     let promise2 =
-      Promise.catch_bind (fun _ -> Promise.resolve expected_result) promise1 in
+      Promise.catch_bind
+        ~on_rejected:(fun _ -> Promise.resolve expected_result) promise1 in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> assert_equal result expected_result))
-      (fun error  -> wrapper (fun () -> failwith "error detected"))
+      ~on_fulfilled:
+        (fun result -> wrapper (fun () -> assert_equal result expected_result))
+      ~on_rejected:
+        (fun _      -> wrapper (fun () -> failwith "error detected"))
       promise2
 
   let suite =
@@ -199,11 +223,15 @@ module Catch_map = struct
     let expected_result = 123 in
 
     let promise1 = Promise.make (fun _ reject -> reject (Js.string "error")) in
-    let promise2 = Promise.catch_map (fun _ -> expected_result) promise1 in
+    let promise2 =
+      Promise.catch_map
+        ~on_rejected:(fun _ -> expected_result) promise1 in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> assert_equal result expected_result))
-      (fun error  -> wrapper (fun () -> failwith "error detected"))
+      ~on_fulfilled:
+        (fun result -> wrapper (fun () -> assert_equal result expected_result))
+      ~on_rejected:
+        (fun _      -> wrapper (fun () -> failwith "error detected"))
       promise2
 
   let suite =
@@ -222,13 +250,15 @@ module Assorted_chaining = struct
       promise1
     in
     let promise3 = Promise.catch_map
-      ~on_rejected:(fun error -> failwith "error detected")
+      ~on_rejected:(fun _ -> failwith "error detected")
       promise2
     in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> assert_equal result 16))
-      (fun error  -> wrapper (fun () -> failwith "error detected"))
+      ~on_fulfilled:
+        (fun result -> wrapper (fun () -> assert_equal result 16))
+      ~on_rejected:
+        (fun _      -> wrapper (fun () -> failwith "error detected"))
       promise3
 
   let test_then_catch_error wrapper =
@@ -238,13 +268,15 @@ module Assorted_chaining = struct
       promise1
     in
     let promise3 = Promise.catch_map
-      ~on_rejected:(fun error -> 256)
+      ~on_rejected:(fun _ -> 256)
       promise2
     in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> assert_equal result 256))
-      (fun error  -> wrapper (fun () -> failwith "error detected"))
+      ~on_fulfilled:
+        (fun result -> wrapper (fun () -> assert_equal result 256))
+      ~on_rejected:
+        (fun _      -> wrapper (fun () -> failwith "error detected"))
       promise3
 
   let suite =
@@ -266,12 +298,12 @@ module All = struct
     let promise3 = Promise.make (fun resolve _ -> resolve result3) in
 
     Promise.then_final
-      (fun result -> wrapper (fun () ->
+      ~on_fulfilled:(fun result -> wrapper (fun () ->
         assert_equal (Array.length result) (Array.length expected_result);
         assert_equal result.(0) result1;
         assert_equal result.(1) result2;
         assert_equal result.(2) result3))
-      (fun error  -> wrapper (fun () -> failwith "error detected"))
+      ~on_rejected:(fun _ -> wrapper (fun () -> failwith "error detected"))
       (Promise.all [|promise1; promise2; promise3|])
 
   let test_all_reject wrapper =
@@ -284,8 +316,10 @@ module All = struct
     let promise3 = Promise.make (fun _ reject -> reject expected_error) in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> failwith "result returned"))
-      (fun error  -> wrapper (fun () -> assert_equal error expected_error))
+      ~on_fulfilled:
+        (fun _     -> wrapper (fun () -> failwith "result returned"))
+      ~on_rejected:
+        (fun error -> wrapper (fun () -> assert_equal error expected_error))
       (Promise.all [|promise1; promise2; promise3|])
 
   let suite =
@@ -302,8 +336,10 @@ module Race = struct
     let promise = Promise.make (fun resolve _ -> resolve expected_result) in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> assert_equal result expected_result))
-      (fun error  -> wrapper (fun () -> failwith "error detected"))
+      ~on_fulfilled:
+        (fun result -> wrapper (fun () -> assert_equal result expected_result))
+      ~on_rejected:
+        (fun _      -> wrapper (fun () -> failwith "error detected"))
       (Promise.race [|promise|])
 
   let test_race_reject_one wrapper =
@@ -312,8 +348,10 @@ module Race = struct
     let promise = Promise.make (fun _ reject -> reject expected_error) in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> failwith "result returned"))
-      (fun error  -> wrapper (fun () -> assert_equal error expected_error))
+      ~on_fulfilled:
+        (fun _     -> wrapper (fun () -> failwith "result returned"))
+      ~on_rejected:
+        (fun error -> wrapper (fun () -> assert_equal error expected_error))
       (Promise.race [|promise|])
 
   let test_race_resolve_two wrapper =
@@ -323,8 +361,10 @@ module Race = struct
     let promise2 = Promise.make (fun _ _ -> ()) in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> assert_equal result expected_result))
-      (fun error  -> wrapper (fun () -> failwith "error detected"))
+      ~on_fulfilled:
+        (fun result -> wrapper (fun () -> assert_equal result expected_result))
+      ~on_rejected:
+        (fun _      -> wrapper (fun () -> failwith "error detected"))
       (Promise.race [|promise1; promise2|])
 
   let test_race_reject_two wrapper =
@@ -334,8 +374,10 @@ module Race = struct
     let promise2 = Promise.make (fun _ _ -> ()) in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> failwith "result returned"))
-      (fun error  -> wrapper (fun () -> assert_equal error expected_error))
+      ~on_fulfilled:
+        (fun _     -> wrapper (fun () -> failwith "result returned"))
+      ~on_rejected:
+        (fun error -> wrapper (fun () -> assert_equal error expected_error))
       (Promise.race [|promise1; promise2|])
 
   let suite =
@@ -353,8 +395,10 @@ module Resolve = struct
     let promise = Promise.resolve expected_result in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> assert_equal result expected_result))
-      (fun error  -> wrapper (fun () -> failwith "error detected"))
+      ~on_fulfilled:
+        (fun result -> wrapper (fun () -> assert_equal result expected_result))
+      ~on_rejected:
+        (fun _      -> wrapper (fun () -> failwith "error detected"))
       promise
 
   let suite =
@@ -369,8 +413,10 @@ module Reject = struct
     let promise = Promise.reject expected_error in
 
     Promise.then_final
-      (fun result -> wrapper (fun () -> failwith "result returned"))
-      (fun error  -> wrapper (fun () -> assert_equal error expected_error))
+      ~on_fulfilled:
+        (fun _     -> wrapper (fun () -> failwith "result returned"))
+      ~on_rejected:
+        (fun error -> wrapper (fun () -> assert_equal error expected_error))
       promise
 
   let suite =
@@ -387,17 +433,17 @@ module Infix = struct
     >>= (fun x -> Promise.resolve (x * x))
     >|| (
       (fun result -> wrapper (fun () -> assert_equal result 16)),
-      (fun error  -> wrapper (fun () -> failwith "error detected"))
+      (fun _      -> wrapper (fun () -> failwith "error detected"))
     )
 
   let test_reject_then_bind wrapper =
     let open Promise.Infix in
 
     Promise.resolve 4
-    >>= (fun x -> Promise.reject (Js.string "error"))
+    >>= (fun _ -> Promise.reject (Js.string "error"))
     >|| (
-      (fun result -> wrapper (fun () -> failwith "result returned")),
-      (fun error  -> wrapper (fun () -> assert_equal error (Js.string "error")))
+      (fun _     -> wrapper (fun () -> failwith "result returned")),
+      (fun error -> wrapper (fun () -> assert_equal error (Js.string "error")))
     )
 
   let test_resolve_then_map wrapper =
@@ -407,47 +453,47 @@ module Infix = struct
     >|= (fun x -> x * x)
     >|| (
       (fun result -> wrapper (fun () -> assert_equal result 16)),
-      (fun error  -> wrapper (fun () -> failwith "error detected"))
+      (fun _      -> wrapper (fun () -> failwith "error detected"))
     )
 
   let test_resolve_catch_bind wrapper =
     let open Promise.Infix in
 
     Promise.resolve 4
-    >>~ (fun error -> Promise.resolve 16)
+    >>~ (fun _ -> Promise.resolve 16)
     >|| (
       (fun result -> wrapper (fun () -> assert_equal result 4)),
-      (fun error  -> wrapper (fun () -> failwith "error detected"))
+      (fun _      -> wrapper (fun () -> failwith "error detected"))
     )
 
   let test_reject_catch_bind wrapper =
     let open Promise.Infix in
 
     Promise.reject (Js.string "error")
-    >>~ (fun error -> Promise.resolve 16)
+    >>~ (fun _ -> Promise.resolve 16)
     >|| (
       (fun result -> wrapper (fun () -> assert_equal result 16)),
-      (fun error  -> wrapper (fun () -> failwith "error detected"))
+      (fun _      -> wrapper (fun () -> failwith "error detected"))
     )
 
   let test_resolve_catch_map wrapper =
     let open Promise.Infix in
 
     Promise.resolve 4
-    >|~ (fun error -> 16)
+    >|~ (fun _ -> 16)
     >|| (
       (fun result -> wrapper (fun () -> assert_equal result 4)),
-      (fun error  -> wrapper (fun () -> failwith "error detected"))
+      (fun _      -> wrapper (fun () -> failwith "error detected"))
     )
 
   let test_reject_catch_map wrapper =
     let open Promise.Infix in
 
     Promise.reject (Js.string "error")
-    >|~ (fun error -> 16)
+    >|~ (fun _ -> 16)
     >|| (
       (fun result -> wrapper (fun () -> assert_equal result 16)),
-      (fun error  -> wrapper (fun () -> failwith "error detected"))
+      (fun _  -> wrapper (fun () -> failwith "error detected"))
     )
 
   let suite =
@@ -487,8 +533,11 @@ module Http = struct
     get "data/file1"
       >|| (
         (fun result ->
-          wrapper (fun () -> assert_equal result (Js.string "file1-contents"))),
-        (fun error  -> wrapper (fun () -> failwith "error detected"))
+          wrapper (fun () ->
+            assert_equal
+              result
+              (Js.some (Js.string "file1-contents")))),
+        (fun _ -> wrapper (fun () -> failwith "error detected"))
       )
 
   let test_get_three_urls wrapper =
@@ -503,12 +552,12 @@ module Http = struct
       (fun result -> wrapper (fun () ->
         assert_equal result
           [|
-            Js.string "file1-contents";
-            Js.string "file2-contents";
-            Js.string "file3-contents";
+            Js.some (Js.string "file1-contents");
+            Js.some (Js.string "file2-contents");
+            Js.some (Js.string "file3-contents");
           |]
       )),
-      (fun error  -> wrapper (fun () -> failwith "error detected"))
+      (fun _ -> wrapper (fun () -> failwith "error detected"))
     )
 
   let suite =
