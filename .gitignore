@@ -1,11 +1,5 @@
 _build
-
-setup.data
-setup.log
-
+.merlin
 geckodriver.log
 
-*.byte
 *.swp
-
-test/test_runner.js
